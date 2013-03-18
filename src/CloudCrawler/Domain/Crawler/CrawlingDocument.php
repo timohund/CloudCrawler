@@ -2,7 +2,11 @@
 
 namespace CloudCrawler\Domain\Crawler;
 
-class CrawlDocument {
+/**
+ *
+ * @author Timo Schmidt <timo-schmidt@gmx.net>
+ */
+class CrawlingDocument {
 
 	/**
 	 * @var
