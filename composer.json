@@ -1,0 +1,27 @@
+{
+	"name": "ts/cloudcrawler",
+	"description": "PHP based map reduce crawler",
+	"license": "MIT",
+	"require": {
+		"php": ">=5.3.3"
+	},
+	"require-dev": {
+		"phing/phing": "*",
+		"phpunit/phpunit": "3.7.*",
+		"squizlabs/php_codesniffer": "*"
+	},
+	"autoload": {
+		"psr-0": {
+			"CloudCrawler\\Tests": "tests/",
+			"CloudCrawler": "src/"
+		}
+	},
+	"minimum-stability": "stable",
+	"authors": [
+		{
+			"name": "Timo Schmidt",
+			"email": "timo-schmidt@gmx.net"
+		}
+
+	]
+}

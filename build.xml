@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cloudcrawler" default="test" basedir=".">
+    <!-- set local values, like git location -->
+    <property file="phing/build.properties" override="true" />
+    <property name="cmd.composer" value="" />
+    <property name="php.interpreter" value="php" />
+    <property name="dir.imports" value="${project.basedir}/phing/imports" />
+
+    <import file="${dir.imports}/dependencies.xml"/>
+    <import file="${dir.imports}/test.xml"/>
+
+
+    <target name="test" description="Run unit tests" depends="clean">
+        <exec passthru="true" command="${project.basedir}/vendor/bin/phpunit --configuration=${project.basedir}/phpunit.xml --verbose" checkReturn="true" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${project.basedir}/build/artifacts/logs"/>
+        <delete dir="${project.basedir}/build/artifacts/dist"/>
+    </target>
+
+    <target name="sniff" description="Check code for PSR-2 compliance">
+        <exec passthru="true" command="${project.basedir}/vendor/bin/phpcs --standard=TYPO3 ${project.basedir}/src" checkReturn="true" />
+    </target>
+
+    <target name="package">
+        <mkdir dir="${project.basedir}/build/artifacts/dist/data" />
+        <mkdir dir="${project.basedir}/build/artifacts/dist/bin" />
+        <exec command="php ${project.basedir}/src/package.php" />
+        <copy file="${project.basedir}/src/CloudCrawler/Bin/map_local.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
+        <copy file="${project.basedir}/src/CloudCrawler/Bin/map_ec2.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
+        <copy file="${project.basedir}/src/CloudCrawler/Bin/reduce_local.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
+        <copy file="${project.basedir}/src/CloudCrawler/Bin/reduce_ec2.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
+
+    </target>
+
+</project>
