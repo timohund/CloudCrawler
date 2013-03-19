@@ -1,5 +1,7 @@
 <?php
 
+namespace CloudCrawler\System\Http;
+
 class Client {
 	/**
 	 * @param $url

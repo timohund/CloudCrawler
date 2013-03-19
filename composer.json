@@ -3,7 +3,9 @@
 	"description": "PHP based map reduce crawler",
 	"license": "MIT",
 	"require": {
-		"php": ">=5.3.3"
+		"php": ">=5.3.3",
+		"ray/di": "1.0.0-beta5",
+		"guzzle/guzzle": "v3.3.1"
 	},
 	"require-dev": {
 		"phing/phing": "*",
@@ -16,7 +18,7 @@
 			"CloudCrawler": "src/"
 		}
 	},
-	"minimum-stability": "stable",
+	"minimum-stability": "dev",
 	"authors": [
 		{
 			"name": "Timo Schmidt",

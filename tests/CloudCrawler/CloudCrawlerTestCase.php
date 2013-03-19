@@ -1,11 +1,11 @@
 <?php
 
-namespace CloudCrawler\Tests\Mocked;
+namespace CloudCrawler\Tests;
 
 /**
  *
  */
-abstract class MockedCloudCrawlerTestCase extends \PHPUnit_Framework_TestCase{
+abstract class CloudCrawlerTestCase extends \PHPUnit_Framework_TestCase{
 	/**
 	 * Helper method to get the path of a "fixtures" folder that is relative to the current class folder.
 	 *

@@ -2,10 +2,7 @@
 
 namespace CloudCrawler\Tests\Mocked\Classes\System;
 
-
-require_once dirname(__FILE__).'/../../MockedCloudCrawlerTestCase.php';
-
-class LinkUnifierTestCase extends \CloudCrawler\Tests\Mocked\MockedCloudCrawlerTestCase {
+class LinkUnifierTestCase extends \CloudCrawler\Tests\CloudCrawlerTestCase {
 
 	/**
 	 * @return array

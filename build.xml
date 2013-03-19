@@ -26,7 +26,7 @@
     <target name="package">
         <mkdir dir="${project.basedir}/build/artifacts/dist/data" />
         <mkdir dir="${project.basedir}/build/artifacts/dist/bin" />
-        <exec command="php ${project.basedir}/src/package.php" />
+        <exec command="php ${project.basedir}/build/package.php" />
         <copy file="${project.basedir}/src/CloudCrawler/Bin/map_local.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
         <copy file="${project.basedir}/src/CloudCrawler/Bin/map_ec2.sh" todir="${project.basedir}/build/artifacts/dist/bin" />
         <copy file="${project.basedir}/src/CloudCrawler/Bin/reduce_local.sh" todir="${project.basedir}/build/artifacts/dist/bin" />

@@ -1,5 +1,7 @@
 <?php
 
+namespace CloudCrawler\MapReduce;
+
 class Emitor {
 
 	/**

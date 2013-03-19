@@ -1,17 +1,30 @@
 <?php
 
+
 namespace CloudCrawler\Domain\Crawler;
 
 /**
+ * A document that is used to store crawling document.
  *
+ * @package CloudCrawler\Domain\Crawler
  * @author Timo Schmidt <timo-schmidt@gmx.net>
  */
 class CrawlingDocument {
 
 	/**
-	 * @var
+	 * @var string
 	 */
 	protected $url = '';
+
+	/**
+	 * @var string
+	 */
+	protected $rawContent = '';
+
+	/**
+	 * @var string
+	 */
+	protected $mimeType = '';
 
 	/**
 	 * @var int
@@ -21,7 +34,7 @@ class CrawlingDocument {
 	/**
 	 * @var int
 	 */
-	protected $visitCount = 0;
+	protected $crawlingCount = 0;
 
 	/**
 	 * @var int
@@ -34,22 +47,52 @@ class CrawlingDocument {
 	protected $incomingLinks = array();
 
 	/**
-	 * @var
+	 * @param  $url
 	 */
-	protected $rawContent;
+	public function setUrl($url) {
+		$this->url = $url;
+	}
 
 	/**
-	 * @param int $incomingLinkCount
+	 * @return
 	 */
-	public function setIncomingLinkCount($incomingLinkCount) {
-		$this->incomingLinkCount = $incomingLinkCount;
+	public function getUrl() {
+		return $this->url;
+	}
+
+	/**
+	 * @param  $rawContent
+	 */
+	public function setRawContent($rawContent) {
+		$this->rawContent = $rawContent;
+	}
+
+	/**
+	 * @return
+	 */
+	public function getRawContent() {
+		return $this->rawContent;
+	}
+
+	/**
+	 * @param string $mimeType
+	 */
+	public function setMimeType($mimeType) {
+		$this->mimeType = $mimeType;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMimeType() {
+		return $this->mimeType;
 	}
 
 	/**
 	 * @return int
 	 */
 	public function getIncomingLinkCount() {
-		return $this->incomingLinkCount;
+		return count($this->getIncomingLinks());
 	}
 
 	/**
@@ -69,36 +112,29 @@ class CrawlingDocument {
 	/**
 	 * @param int $visitCount
 	 */
-	public function setVisitCount($visitCount) {
-		$this->visitCount = $visitCount;
+	public function setCrawlingCount($crawlingCount) {
+		$this->crawlingCount = $crawlingCount;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getVisitCount() {
-		return $this->visitCount;
+	public function getCrawlingCount() {
+		return $this->crawlingCount;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function incrementCrawlingCount() {
+		$this->crawlingCount++;
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function getWasVisited() {
-		return $this->getVisitCount() > 0;
-	}
-
-	/**
-	 * @param  $rawContent
-	 */
-	public function setRawContent($rawContent) {
-		$this->rawContent = $rawContent;
-	}
-
-	/**
-	 * @return
-	 */
-	public function getRawContent() {
-		return $this->rawContent;
+	public function getWasCrawled() {
+		return $this->getCrawlingCount() > 0;
 	}
 
 	/**
@@ -122,22 +158,11 @@ class CrawlingDocument {
 		$this->incomingLinks[$url] = $url;
 	}
 
-	public function incrementAnalyzeCount() {
+	/**
+	 * @return void
+	 */
+	public function incrementLinkAnalyzeCount() {
 		$this->linkAnalyzeCount++;
-	}
-
-	/**
-	 * @param  $url
-	 */
-	public function setUrl($url) {
-		$this->url = $url;
-	}
-
-	/**
-	 * @return
-	 */
-	public function getUrl() {
-		return $this->url;
 	}
 
 }
