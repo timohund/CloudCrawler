@@ -167,7 +167,7 @@ class LinkUnifierTestCase extends \CloudCrawler\Tests\CloudCrawlerTestCase {
 	 * @test
 	 */
 	public function getUnifiedUrl($targetHref, $sourceUrl, $sourceBaseHref, $expectedResult) {
-		$unifier = new \CloudCrawler\System\Url\LinkUnifier();
+		$unifier = new \CloudCrawler\System\Url\Unifier();
 		$result = $unifier->getUnifiedUrl($targetHref, $sourceUrl, $sourceBaseHref);
 		$this->assertEquals($result, $expectedResult, 'Could not unify url '.$targetHref.' '.$sourceUrl.' '.$sourceBaseHref);
 	}
