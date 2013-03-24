@@ -153,8 +153,20 @@ class LinkUnifierTestCase extends \CloudCrawler\Tests\CloudCrawlerTestCase {
 				'itemUrl' => '',
 				'baseHref' => '',
 				'expectedResult' => 'http://www.customer.de/Ohrstecker+"SMILEY"+925er+Sterlingsilber+24k+vergoldet/f4259fce60f4988c9fd9c30da0414e2af0bb0d8f,de_DE,pd.html'
+			),
+			'Only href with complex path is corrected' => array(
+				'href' => 'http://www.heise.de/../../test.html',
+				'itemUrl' => '',
+				'baseHref' => '',
+				'expectedResult' => 'http://www.heise.de/test.html'
+			),
+			' /one.html is linking to correct target when base href was set and ../ in href' => array(
+				'href' => '/foo/bar/../one.html',
+				'itemUrl' => 'http://www.test.de/foo/bar/cola',
+				'baseHref' => 'http://www.test.de/foo/',
+				'expectedResult' => 'http://www.test.de/foo/one.html'
+			),
 
-			)
 		);
 	}
 
@@ -167,7 +179,7 @@ class LinkUnifierTestCase extends \CloudCrawler\Tests\CloudCrawlerTestCase {
 	 * @test
 	 */
 	public function getUnifiedUrl($targetHref, $sourceUrl, $sourceBaseHref, $expectedResult) {
-		$unifier = new \CloudCrawler\System\Url\Unifier();
+		$unifier = new \CloudCrawler\System\Url\Unifier(new \CloudCrawler\System\Url\Parser());
 		$result = $unifier->getUnifiedUrl($targetHref, $sourceUrl, $sourceBaseHref);
 		$this->assertEquals($result, $expectedResult, 'Could not unify url '.$targetHref.' '.$sourceUrl.' '.$sourceBaseHref);
 	}

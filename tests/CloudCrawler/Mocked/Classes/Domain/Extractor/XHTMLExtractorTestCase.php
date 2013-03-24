@@ -14,7 +14,9 @@ class XHTMLExtractorTestCase extends \CloudCrawler\Tests\CloudCrawlerTestCase {
 	 */
 	public function setUp() {
 		$this->extractor 	= new \CloudCrawler\Domain\Extractor\XHTMLExtractor();
-		$this->extractor->injectLinkUnifier(new \CloudCrawler\System\Url\LinkUnifier());
+		$this->extractor->injectLinkUnifier(new \CloudCrawler\System\Url\Unifier(
+			new \CloudCrawler\System\Url\Parser()
+		));
 	}
 
 	/**

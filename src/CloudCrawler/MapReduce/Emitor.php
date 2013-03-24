@@ -9,7 +9,10 @@ class Emitor {
 	*/
 	protected $emits;
 
-	
+	protected function indicateProgress() {
+		echo chr(0).PHP_EOL;
+	}
+
 	protected function emit($key, $value) {
 		echo $key,chr(9),$value,PHP_EOL;
 	}
@@ -31,7 +34,13 @@ class Emitor {
 	}
 
 	protected function wakeup($sting) {
-		return unserialize(base64_decode($sting));
+		$result = @unserialize(base64_decode($sting));
+
+		if(is_object($result)) {
+			return $result;
+		} else {
+			return false;
+		}
 	}
 }
 

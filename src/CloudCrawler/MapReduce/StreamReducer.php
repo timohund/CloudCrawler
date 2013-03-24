@@ -55,9 +55,7 @@ class StreamReducer extends Emitor {
 	public function reduce() {
 		$this->onStartEmit();
 
-		$counter=0;
 		while( ($line = fgets(STDIN)) != false) {
-			$counter++;
 			$line = trim($line);
 			if($line != '') {
 				@list($url, $serializedCrawData) = explode(chr(9), $line);
@@ -66,12 +64,13 @@ class StreamReducer extends Emitor {
 					/** @var $crawlData \CloudCrawler\Domain\Crawler\CrawlingDocument */
 
 					$crawlData = $this->wakeup($serializedCrawData);
-
 					if($crawlData->getLinkAnalyzeCount() == 0) {
 
 							//todo chose the correct extractor automatically
 						$extractor = new \CloudCrawler\Domain\Extractor\XHTMLExtractor();
-						$extractor->injectLinkUnifier(new \CloudCrawler\System\Url\LinkUnifier());
+						$extractor->injectLinkUnifier(new \CloudCrawler\System\Url\Unifier(
+							new \CloudCrawler\System\Url\Parser()
+						));
 						$extractor->initialize(
 							$crawlData->getRawContent(),
 							$url,
@@ -80,18 +79,24 @@ class StreamReducer extends Emitor {
 
 						$links = $extractor->getOutgoingLinks();
 						foreach($links as $link) {
-							if(isset($this->emits[$link])) {
+								//todo temporary only follow de links
+							if(strpos($link,".de") !== false ) {
+									//temporary strip the querystring
+								$link = preg_replace('/\?.*/', '', $link);
+								if(isset($this->emits[$link])) {
 									/** @var $targetCrawlData \CloudCrawler\Domain\Crawler\CrawlingDocument */
-								$targetCrawlData = $this->wakeup($this->emits[$link]);
+									$targetCrawlData = $this->wakeup($this->emits[$link]);
 									//we have a crawled document as emit
-								$targetCrawlData->addIncomingLink($url);
-								$this->emitOrMerge($link, $targetCrawlData);
+									$targetCrawlData->addIncomingLink($url);
+									$this->emitOrMerge($link, $targetCrawlData);
 
-							} else {
-								$newCrawlData = new \CloudCrawler\Domain\Crawler\CrawlingDocument();
-								$newCrawlData->setUrl($link);
-								$newCrawlData->addIncomingLink($url);
-								$this->emitOrMerge($link, $newCrawlData);
+								} else {
+									$newCrawlData = new \CloudCrawler\Domain\Crawler\CrawlingDocument();
+									$newCrawlData->setUrl($link);
+									$newCrawlData->addIncomingLink($url);
+									$this->emitOrMerge($link, $newCrawlData);
+								}
+
 							}
 						}
 
@@ -106,11 +111,7 @@ class StreamReducer extends Emitor {
 				}
 			}
 
-			if($counter > 50) {
-				arsort($this->emits);
-				$this->onEndEmit();
-				$counter=0;
-			}
+			$this->indicateProgress();
 		}
 
 		arsort($this->emits);

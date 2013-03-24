@@ -13,6 +13,7 @@ class StreamMapper extends Emitor {
 			$counter++;
 			@list($url, $value) = explode(chr(9), $line);
 
+			echo "Handle url: ".$url.PHP_EOL;
 			if(isset($url)) {
 
 				if(!isset($value) || $value === 0  || trim($value) == '') {
@@ -22,22 +23,25 @@ class StreamMapper extends Emitor {
 					$crawlData = $this->wakeup($value);
 				}
 
-				if(!$crawlData->getWasCrawled()) {
-					$httpClient = new \CloudCrawler\System\Http\Client();
-					$content = $httpClient->post($url);
-					$crawlData->setUrl($url);
-					$crawlData->setRawContent($content);
-					$crawlData->incrementCrawlingCount();
-				}
+				try {
+					if($crawlData !== false) {
+						if(!$crawlData->getWasCrawled()) {
+							$httpClient = new \CloudCrawler\System\Http\Client();
+							$content = $httpClient->post($url);
+							$crawlData->setUrl($url);
+							$crawlData->setRawContent($content);
+							$crawlData->incrementCrawlingCount();
+						}
 
-				$this->emits[$url] = $this->persist($crawlData);
+						$this->emits[$url] = $this->persist($crawlData);
+					} else {
+						$this->emits[$url] = false;
+					}
+
+				} catch (\Exception $e) {}
 			}
 
-			if($counter > 50) {
-				ksort($this->emits);
-				$this->onEndEmit();
-				$counter = 0;
-			}
+			$this->indicateProgress();
 		}
 
 		ksort($this->emits);

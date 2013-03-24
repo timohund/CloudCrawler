@@ -1,8 +1,19 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: timo
- * Date: 20.03.13
- * Time: 21:27
- * To change this template use File | Settings | File Templates.
- */
+
+
+class Encode {
+
+	/**
+	 * @var \CloudCrawler\System\Url\Parser
+	 */
+	protected $urlParser;
+
+	/**
+	 *
+	 */
+	public function encode($url) {
+
+	}
+}
+
+?>

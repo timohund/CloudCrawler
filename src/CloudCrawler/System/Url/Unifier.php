@@ -2,83 +2,83 @@
 
 namespace CloudCrawler\System\Url;
 
-class LinkUnifier {
+/**
+ * The Unifier is responsible to generate unified urls
+ * from link target, document url and base url.
+ *
+ * This is needed to be able to compare urls
+ *
+ * Example Input: http://www.google.de/foo/bar/.././foo.html
+ * Example Output: http://www.google.de/foo/foo.html
+ *
+ */
+class Unifier {
 
 	/**
-	 * @param $href
-	 * @param $itemUrl
-	 * @param $itemBaseUrl
+	 * @var \CloudCrawler\System\Url\Parser
 	 */
-	public function getUnifiedUrl($href, $itemUrl, $itemBaseUrl) {
-		$result 			= '';
-		$hrefIsCompleteUrl 	= $this->getIsCompleteUrlLink($href);
-		$hrefIsAbsolute		= $this->getIsAbsoluteLink($href);
+	protected $urlParser;
 
-		$hrefParts 			= $this->parseUtf8Url($href);
-		$itemUrlParts		= $this->parseUtf8Url($itemUrl);
-		$itemBaseUrlParts	= $this->parseUtf8Url($itemBaseUrl);
+	/**
+	 * @param Parser $parser
+	 */
+	public function __construct(\CloudCrawler\System\Url\Parser $parser) {
+		$this->urlParser = $parser;
+	}
+
+	/**
+	 * @param string $targetHrefString
+	 * @param string $sourceUrlString
+	 * @param string $sourceBaseHrefString
+	 */
+	public function getUnifiedUrl($targetHrefString, $sourceUrlString, $sourceBaseHrefString) {
+		$hrefIsCompleteUrl 	= $this->getIsCompleteUrlLink($targetHrefString);
+		$hrefIsAbsolute		= $this->getIsAbsoluteLink($targetHrefString);
+
+		$sourceUrl			= $this->urlParser->parse($sourceUrlString);
+		$itemBaseHref		= $this->urlParser->parse($sourceBaseHrefString);
 
 		if($hrefIsCompleteUrl) {
 				//simplest case href containing complete url with schema
-			if($this->getIsUrlContainingSchema($href)) {
-				return $this->getPrettyPrintedUrl($href);
+			if($this->getIsUrlContainingSchema($targetHrefString)) {
+				$targetHref 	= $this->urlParser->parse($targetHrefString);
+				return (string) $this->unifyPath($targetHref);
 			} else {
 				//we have an absolute href without schema
-				if(isset($itemBaseUrlParts['scheme'])) {
-					$result = $itemBaseUrlParts['scheme'].':'.$href;
-					return $this->getPrettyPrintedUrl($result);
-				} elseif(isset($itemUrlParts)) {
-					$result = $itemUrlParts['scheme'].':'.$href;
-					return $this->getPrettyPrintedUrl($result);
+				if($itemBaseHref->getScheme() != '') {
+					$resultUrlString 	= $itemBaseHref->getScheme().':'.$targetHrefString;
+					$result 			= $this->urlParser->parse($resultUrlString);
+					return (string) $this->unifyPath($result);
+				} elseif(isset($sourceUrl)) {
+					$resultUrlString	= $sourceUrl->getScheme().':'.$targetHrefString;
+					$result 			= $this->urlParser->parse($resultUrlString);
+
+					return (string) $this->unifyPath($result);
 				} else {
 					throw new Exception('Could not get schema from base href or linking url for href with schema');
 				}
 			}
 		} elseif($hrefIsAbsolute) {
-			if($itemUrl != '' && $this->getIsCompleteUrlLink($itemUrl)) {
-				if(isset($itemUrlParts['scheme'])) {
-					$result .= $itemUrlParts['scheme'].'://';
+			$result = $this->urlParser->parse($targetHrefString);
+			if($sourceUrlString != '' && $this->getIsCompleteUrlLink($sourceUrlString)) {
+				if($sourceUrl->getScheme() != '') {
+					$result->setScheme($sourceUrl->getScheme());
 				}
 
-				if(isset($itemUrlParts['host'])) {
-					$result .= $itemUrlParts['host'];
+				if($sourceUrl->getHost() != '') {
+					$result->setHost($sourceUrl->getHost());
 				}
 
-				$result .= $href;
-				return $this->getPrettyPrintedUrl($result);
+				return (string) $this->unifyPath($result);
 			}
 		} else {
 			//href is relative
-			if($itemBaseUrl !== '') {
-				if(isset($itemBaseUrlParts['scheme'])) {
-					$result .= $itemBaseUrlParts['scheme'] .'://';
-				}
-
-				if(isset($itemBaseUrlParts['host'])) {
-					$result .= $itemBaseUrlParts['host'];
-				}
-
-				if(isset($itemBaseUrlParts['path'])) {
-					$result .= $this->stripFileNameFromPath($itemBaseUrlParts['path']);
-				}
-
-				$result .= $href;
-				return $this->getPrettyPrintedUrl($result);
-			} elseif($itemUrl !== '') {
-				if(isset($itemUrlParts['scheme'])) {
-					$result .= $itemUrlParts['scheme'] .'://';
-				}
-
-				if(isset($itemUrlParts['host'])) {
-					$result .= $itemUrlParts['host'];
-				}
-
-				if(isset($itemUrlParts['path'])) {
-					$result .= $this->stripFileNameFromPath($itemUrlParts['path']);
-				}
-
-				$result .= $href;
-				return $this->getPrettyPrintedUrl($result);
+			if($sourceBaseHrefString !== '') {
+				$result = $this->getHrefRelativeTo($itemBaseHref, $targetHrefString);
+				return (string) $this->unifyPath($result);
+			} elseif($sourceUrlString !== '') {
+				$result = $this->getHrefRelativeTo($sourceUrl, $targetHrefString);
+				return (string) $this->unifyPath($result);
 			} else {
 				throw new Exception('Relative href and now url or base href present');
 			}
@@ -86,46 +86,36 @@ class LinkUnifier {
 	}
 
 	/**
-	 * @param $url
+	 * @param \CloudCrawler\System\Url\Url $relativeHrefBase
+	 * @param string $targetHrefString
 	 */
-	protected function getPrettyPrintedUrl($url) {
-		$resultParts 	= $this->parseUtf8Url($url);
-		$result 		= '';
+	public function getHrefRelativeTo($relativeHrefBase, $targetHrefString) {
+		$newTarget = '';
+		if ($relativeHrefBase->getPath() !== '') {
+			$newTarget .= $this->stripFileNameFromPath($relativeHrefBase->getPath());
+		}
+		$newTarget .= $targetHrefString;
 
-		if(isset($resultParts['scheme'])) {
-			$result .= $resultParts['scheme'].'://';
+		$result 	= $this->urlParser->parse($newTarget);
+		if ($relativeHrefBase->getScheme() != '') {
+			$result->setScheme($relativeHrefBase->getScheme());
 		}
 
-		if(isset($resultParts['user']) && isset($resultParts['pass'])) {
-			$result .= $resultParts['user'].':'.$resultParts['pass'].'@';
+		if ($relativeHrefBase->getHost() !== '') {
+			$result->setHost($relativeHrefBase->getHost());
 		}
 
-		if(isset($resultParts['host'])) {
-			$result .= $resultParts['host'];
+		return $result;
+	}
 
-			if(isset($resultParts['port'])) {
-				$result .= ':'.$resultParts['port'];
-			}
-		}
-
-		if(isset($resultParts['path'])) {
-			$path = $resultParts['path'];
-			$path = $this->getUnifiedPath($path);
-			if(strpos($path,'/') !== 0) {
-				$path = '/'.$path;
-			}
-		} else {
-			$path = '/';
-		}
-		$result .= $path;
-
-		if(isset($resultParts['query'])) {
-			$result .= '?'.$resultParts['query'];
-		}
-
-		if(isset($resultParts['fragment'])) {
-			$result .= '#'.$resultParts['fragment'];
-		}
+	/**
+	 * @param \CloudCrawler\System\Url\Url $result
+	 * @return \CloudCrawler\System\Url\Url mixed
+	 */
+	public function unifyPath($result) {
+		$path = $result->getPath();
+		$unifiedPath = $this->getUnifiedPath($path);
+		$result->setPath($unifiedPath);
 
 		return $result;
 	}
@@ -133,7 +123,7 @@ class LinkUnifier {
 	/**
 	 * Removes everything behind the last slash in the path (the filename) from a given string.
 	 *
-	 * @param $path
+	 * @param string $path
 	 */
 	protected function stripFileNameFromPath($path) {
 		return substr($path,0,strrpos($path,"/")+1);
@@ -146,7 +136,6 @@ class LinkUnifier {
 	 * @return string $path
 	 */
 	protected function getUnifiedPath($path) {
-
 		$parts = explode('/',$path);
 		$resultStack = array();
 		foreach($parts as $part) {
@@ -165,34 +154,14 @@ class LinkUnifier {
 	}
 
 	/**
-	* @param $url
-	* @return mixed
-	 */
-	protected function parseUtf8Url($url) {
-		static $keys = array('scheme'=>0,'user'=>0,'pass'=>0,'host'=>0,'port'=>0,'path'=>0,'query'=>0,'fragment'=>0);
-		if (is_string($url) && preg_match(
-			'~^((?P<scheme>[^:/?#]+):(//))?((\\3|//)?(?:(?P<user>[^:]+):(?P<pass>[^@]+)@)?(?P<host>[^/?:#]*))(:(?P<port>\\d+))?' .
-				'(?P<path>[^?#]*)(\\?(?P<query>[^#]*))?(#(?P<fragment>.*))?~u', $url, $matches)) {
-			foreach ($matches as $key => $value) {
-				if (!isset($keys[$key]) || empty($value)) {
-					unset($matches[$key]);
-
-				}
-			}
-
-			return $matches;
-		}
-	}
-
-	/**
 	 * When the urls first / is followed by a second slash, it's an an absolute url.
 	 *
-	 * @param $url
+	 * @param string $urlString
 	 * @return bool
 	 */
-	protected function getIsCompleteUrlLink($url) {
+	protected function getIsCompleteUrlLink($urlString) {
 		$matches = array();
-		preg_match('~[^/]*//~',$url,$matches);
+		preg_match('~[^/]*//~',$urlString,$matches);
 		return count($matches) > 0;
 	}
 
@@ -200,22 +169,22 @@ class LinkUnifier {
 	 * This method is used to check if a link is an absolute link, starting mit / (but not // what
 	 * referes to a domain)
 	 *
-	 * @param $url
+	 * @param string $urlString
 	 * @return bool
 	 */
-	protected function getIsAbsoluteLink($url) {
-		$url = trim($url);
-		$isStaringWithSlash = strpos($url,'/') === 0;
-		$isStartingWithDoubleSlash = strpos($url,'//') === true;
+	protected function getIsAbsoluteLink($urlString) {
+		$urlString = trim($urlString);
+		$isStaringWithSlash = strpos($urlString,'/') === 0;
+		$isStartingWithDoubleSlash = strpos($urlString,'//') === true;
 
 		return $isStaringWithSlash && !$isStartingWithDoubleSlash;
 	}
 
 	/**
-	 * @param string $url
+	 * @param string $urlString
 	 * @return bool
 	 */
-	protected function getIsUrlContainingSchema($url) {
-		return strpos($url,'://') > 0;
+	protected function getIsUrlContainingSchema($urlString) {
+		return strpos($urlString,'://') > 0;
 	}
 }

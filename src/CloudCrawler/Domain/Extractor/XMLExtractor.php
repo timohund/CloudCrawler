@@ -5,7 +5,7 @@ namespace CloudCrawler\Domain\Extractor;
 class XMLExtractor extends \CloudCrawler\Domain\Extractor\AbstractExtractor {
 
 	/**
-	 * @var \CloudCrawler\System\Url\LinkUnifier
+	 * @var \CloudCrawler\System\Url\Unifier
 	 */
 	protected $linkUnifier;
 
@@ -27,9 +27,9 @@ class XMLExtractor extends \CloudCrawler\Domain\Extractor\AbstractExtractor {
 	}
 
 	/**
-	 * @param \CloudCrawler\System\Url\LinkUnifier $linkUnifier
+	 * @param \CloudCrawler\System\Url\Unifier $linkUnifier
 	 */
-	public function injectLinkUnifier(\CloudCrawler\System\Url\LinkUnifier $linkUnifier) {
+	public function injectLinkUnifier(\CloudCrawler\System\Url\Unifier $linkUnifier) {
 		$this->linkUnifier = $linkUnifier;
 	}
 

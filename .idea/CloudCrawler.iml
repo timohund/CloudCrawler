@@ -4,6 +4,18 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="PHARS">
+        <CLASSES>
+          <root url="phar:///home/timo/Projects/CloudCrawler/composer.phar" />
+          <root url="phar:///home/timo/Projects/CloudCrawler/build/artifacts/dist/bin/CloudCrawler.phar" />
+        </CLASSES>
+        <SOURCES>
+          <root url="phar:///home/timo/Projects/CloudCrawler/composer.phar" />
+          <root url="phar:///home/timo/Projects/CloudCrawler/build/artifacts/dist/bin/CloudCrawler.phar" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
 
